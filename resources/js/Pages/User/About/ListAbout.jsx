@@ -94,7 +94,7 @@ export default function ListAbout({ onLoaded }) {
                                         href={about.extra_link}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-block bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition"
+                                        className="inline-block text-white px-5 py-2 rounded bg-[#1b096c] hover:bg-[#34278c] transition"
                                     >
                                         More Information
                                     </a>

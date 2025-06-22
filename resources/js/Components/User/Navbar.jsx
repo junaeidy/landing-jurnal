@@ -92,15 +92,7 @@ export default function Navbar({ user }) {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`relative px-2 py-1 text-lg font-semibold transition-colors duration-200${
-                                    isActive(link.href)
-                                        ? "text-[#1b096c]"
-                                        : "text-gray-700 hover:text-[#1b096c]"
-                                }
-    after:absolute after:left-0 after:bottom-0 after:h-[2px] after:bg-[#1b096c]
-    after:transition-all after:duration-300 after:ease-in-out after:w-0
-    ${isActive(link.href) ? "after:w-full" : "hover:after:w-full"}
-  `}
+                                className={`relative px-2 py-1 text-lg font-semibold transition-colors duration-200${isActive(link.href)? "text-[#1b096c]" : "text-gray-700 hover:text-[#1b096c]"} after:absolute after:left-0 after:bottom-0after:h-[2px] after:bg-[#1b096c] after:transition-all after:duration-300 after:ease-in-out after:w-0${isActive(link.href) ?"after:w-full" : "hover:after:w-full"}`}
                             >
                                 {link.label}
                             </Link>
@@ -155,11 +147,7 @@ export default function Navbar({ user }) {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`relative px-2 py-1 text-base font-medium text-gray-700 transition-colors duration-200
-  hover:text-teal-600 after:absolute after:left-0 after:bottom-0 after:h-[2px] after:bg-teal-600 
-  after:transition-all after:duration-300 after:ease-in-out after:w-0 hover:after:w-full ${
-      isActive(link.href) ? "text-teal-600 after:w-full" : ""
-  }`}
+                            className={`relative px-2 py-1 text-base font-medium transition-all duration-200 text-gray-700 hover:text-[#1b096c] after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px]after:bg-[#1b096c] after:transition-all after:duration-300 ${isActive(link.href) ? "text-[#1b096c] after:w-full" : "after:w-0 hover:after:w-full"}`}
                         >
                             {link.label}
                         </Link>
