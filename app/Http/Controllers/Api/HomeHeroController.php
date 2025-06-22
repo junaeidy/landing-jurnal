@@ -72,8 +72,8 @@ class HomeHeroController extends Controller
             'subtitle_id' => 'nullable|string',
             'subtitle_en' => 'nullable|string',
             'cta_text_id' => 'nullable|string',
-            'cta_text_en' => 'nullable' | 'string',
-            'cta_link' => 'nullable' | 'url',
+            'cta_text_en' => 'nullable|string',
+            'cta_link' => 'nullable|url',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
         ]);
 

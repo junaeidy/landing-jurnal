@@ -22,7 +22,7 @@ class HomeAboutController extends Controller
             'title_en' => 'required|string|max:255',
             'content_id' => 'nullable|string',
             'content_en' => 'nullable|string',
-            'google_form_link' => 'nullable|url',
+            'google_form_link' => 'nullable|string',
             'whatsapp_link' => 'nullable|url',
             'image' => 'nullable|image|max:2048',
         ]);
@@ -55,7 +55,7 @@ class HomeAboutController extends Controller
             'title_en' => 'nullable|string|max:255',
             'content_id' => 'nullable|string',
             'content_en' => 'nullable|string',
-            'google_form_link' => 'nullable|url',
+            'google_form_link' => 'nullable|string',
             'whatsapp_link' => 'nullable|url',
             'image' => 'nullable|image|max:2048',
         ]);

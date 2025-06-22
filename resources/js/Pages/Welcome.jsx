@@ -37,7 +37,7 @@ export default function Home({ auth }) {
 
             {isLoading && (
                 <div className="fixed inset-0 bg-white z-[999] flex flex-col items-center justify-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent"></div>
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#1b096c] border-t-transparent"></div>
                     <p className="mt-4 text-gray-600 text-sm font-medium">
                         Loading...
                     </p>

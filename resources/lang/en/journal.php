@@ -5,6 +5,7 @@ return [
     'find_title' => 'Find Journal',
     'find_description' => 'Exploring a collection of quality scientific journals from various fields that have been published on our Journal platform.',
     'read_more' => 'Read more',
+    'read_less' => 'Read less',
     'view_all' => 'View All Journals',
     'visit' => 'Visit Journal',
     'contact' => 'Contact',

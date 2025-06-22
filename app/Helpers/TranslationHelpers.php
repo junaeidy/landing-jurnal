@@ -43,6 +43,7 @@ class TranslationHelpers
                 'find_title' => __('journal.find_title'),
                 'find_description' => __('journal.find_description'),
                 'read_more' => __('journal.read_more'),
+                'read_less' => __('journal.read_less'),
                 'view_all' => __('journal.view_all'),
                 'visit' => __('journal.visit'),
                 'contact' => __('journal.contact'),

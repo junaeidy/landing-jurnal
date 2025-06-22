@@ -6,6 +6,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
     const [journals, setJournals] = useState([]);
     const [selectedJournal, setSelectedJournal] = useState(null);
+    const [isExpanded, setIsExpanded] = useState(false);
     const sliderRef = useRef(null);
     const { translations, locale } = usePage().props;
     const journalT = translations?.journal || {};
@@ -26,7 +27,10 @@ export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
         fetchJournals();
     }, []);
 
-    const handleCloseModal = () => setSelectedJournal(null);
+    const handleCloseModal = () => {
+        setSelectedJournal(null);
+        setIsExpanded(false);
+    };
 
     const scroll = (direction) => {
         const slider = sliderRef.current;
@@ -57,30 +61,37 @@ export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
     if (isLoading || journals.length === 0) return null;
 
     return (
-        <section className="py-16 bg-white relative">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <section className="py-20 bg-gradient-to-b from-white via-[#f7f9fc] to-white relative overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
                 <h2
-                    className="text-3xl md:text-4xl font-bold text-gray-800 mb-12"
+                    className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-4"
                     data-aos="fade-up"
                 >
                     {journalT.title}
                 </h2>
+                <div
+                    className="w-24 h-1 mx-auto bg-[#1b096c] rounded-full mb-12"
+                    data-aos="fade-up"
+                    data-aos-delay="100"
+                />
 
+                {/* Navigasi panah */}
                 <div className="hidden md:block">
                     <button
                         onClick={() => scroll("left")}
-                        className="absolute left-4 top-[52%] z-10 bg-white shadow-md p-2 rounded-full hover:bg-gray-100"
+                        className="absolute left-6 top-[50%] -translate-y-1/2 z-10 bg-white border border-gray-200 shadow-lg p-2 rounded-full hover:bg-green-800 transition"
                     >
-                        <ChevronLeftIcon className="h-6 w-6 text-gray-700" />
+                        <ChevronLeftIcon className="h-6 w-6 text-emerald-600" />
                     </button>
                     <button
                         onClick={() => scroll("right")}
-                        className="absolute right-4 top-[52%] z-10 bg-white shadow-md p-2 rounded-full hover:bg-gray-100"
+                        className="absolute right-6 top-[50%] -translate-y-1/2 z-10 bg-white border border-gray-200 shadow-lg p-2 rounded-full hover:bg-emerald-50 transition"
                     >
-                        <ChevronRightIcon className="h-6 w-6 text-gray-700" />
+                        <ChevronRightIcon className="h-6 w-6 text-emerald-600" />
                     </button>
                 </div>
 
+                {/* Slider */}
                 <div
                     ref={sliderRef}
                     className="flex overflow-x-auto gap-6 scroll-smooth scrollbar-hide py-2"
@@ -88,7 +99,7 @@ export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
                     {journals.map((journal, index) => (
                         <div
                             key={journal.id}
-                            className="min-w-[80%] sm:min-w-[300px] sm:max-w-[300px] bg-white rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition duration-300 border border-gray-200"
+                            className="min-w-[80%] sm:min-w-[300px] sm:max-w-[300px] bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 hover:shadow-emerald-100 hover:ring-2 hover:ring-emerald-300 transform hover:scale-[1.02] transition duration-300"
                             data-aos="fade-up"
                             data-aos-delay={index * 100}
                         >
@@ -101,11 +112,11 @@ export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
                                 alt={getText(journal.title)}
                                 className="w-full h-48 object-cover"
                             />
-                            <div className="p-4 text-left">
-                                <h3 className="text-base font-semibold text-gray-800 mb-2 leading-snug line-clamp-2">
+                            <div className="p-5 text-left">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-2 leading-snug line-clamp-2">
                                     {getText(journal.title)}
                                 </h3>
-                                <p className="text-gray-700 text-sm mb-4">
+                                <p className="text-gray-600 text-sm mb-4 line-clamp-4">
                                     {truncate(
                                         stripHtml(getText(journal.description)),
                                         120
@@ -114,7 +125,7 @@ export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
 
                                 <button
                                     onClick={() => setSelectedJournal(journal)}
-                                    className="inline-block bg-[#50c878] hover:bg-[#3fa767] text-white font-bold py-1.5 px-4 rounded-lg text-xs transition duration-300"
+                                    className="inline-block bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-lg text-sm transition duration-300"
                                 >
                                     {journalT.read_more}
                                 </button>
@@ -123,10 +134,11 @@ export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
                     ))}
                 </div>
 
-                <div className="mt-12" data-aos="zoom-in" data-aos-delay="800">
+                {/* CTA */}
+                <div className="mt-14" data-aos="zoom-in" data-aos-delay="800">
                     <Link
                         href="/journal"
-                        className="inline-block bg-[#50c878] hover:bg-[#3fa767] text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 transform hover:scale-105"
+                        className="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 transform hover:scale-105 shadow-md"
                     >
                         {journalT.view_all}
                     </Link>
@@ -155,14 +167,75 @@ export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <div
-                                        className="text-gray-700 leading-relaxed prose max-w-none"
-                                        dangerouslySetInnerHTML={{
-                                            __html: getText(
+                                    <div className="text-gray-700 leading-relaxed prose max-w-none max-h-[200px] overflow-y-auto pr-2">
+                                        {(() => {
+                                            const htmlContent = getText(
                                                 selectedJournal.description
-                                            ),
-                                        }}
-                                    />
+                                            );
+                                            const plainText =
+                                                stripHtml(htmlContent);
+                                            const wordCount =
+                                                plainText.split(/\s+/).length;
+
+                                            if (!isExpanded && wordCount > 30) {
+                                                return (
+                                                    <>
+                                                        <div
+                                                            dangerouslySetInnerHTML={{
+                                                                __html:
+                                                                    stripHtml(
+                                                                        htmlContent
+                                                                    )
+                                                                        .split(
+                                                                            /\s+/
+                                                                        )
+                                                                        .slice(
+                                                                            0,
+                                                                            30
+                                                                        )
+                                                                        .join(
+                                                                            " "
+                                                                        ) +
+                                                                    "...",
+                                                            }}
+                                                        />
+                                                        <button
+                                                            onClick={() =>
+                                                                setIsExpanded(
+                                                                    true
+                                                                )
+                                                            }
+                                                            className="mt-2 text-sm text-[#2A7C4C] underline hover:text-[#50c878] transition"
+                                                        >
+                                                            {journalT.read_more}
+                                                        </button>
+                                                    </>
+                                                );
+                                            }
+
+                                            return (
+                                                <>
+                                                    <div
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: htmlContent,
+                                                        }}
+                                                    />
+                                                    {wordCount > 30 && (
+                                                        <button
+                                                            onClick={() =>
+                                                                setIsExpanded(
+                                                                    false
+                                                                )
+                                                            }
+                                                            className="mt-2 text-sm text-[#2A7C4C] underline hover:text-[#50c878] transition"
+                                                        >
+                                                            {journalT.read_less}
+                                                        </button>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
 
                                     <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
                                         {selectedJournal.link && (
@@ -170,16 +243,16 @@ export default function FeaturedJournalsSection({ onLoadComplete, isLoading }) {
                                                 href={selectedJournal.link}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex-1 text-center bg-[#50c878] hover:bg-[#3fa767] text-white font-semibold py-2.5 px-4 rounded-lg transition duration-300"
+                                                className="flex-1 text-center bg-[#2A7C4C] hover:bg-[#3fa767] text-white font-semibold py-2.5 px-4 rounded-lg transition duration-300"
                                             >
                                                 {journalT.visit}
                                             </a>
                                         )}
                                         <a
-                                            href="https://wa.me/6285379388533"
+                                            href="https://wa.me/62895323444273"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex-1 text-center flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-300"
+                                            className="flex-1 text-center flex items-center justify-center gap-2 bg-[#2e4799] hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-300"
                                         >
                                             {journalT.contact}
                                         </a>

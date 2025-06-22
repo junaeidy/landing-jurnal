@@ -5,6 +5,7 @@ return [
     'find_title' => 'Temukan Jurnal',
     'find_description' => 'Jelajahi koleksi jurnal ilmiah berkualitas dari berbagai bidang yang telah diterbitkan di platform kami.',
     'read_more' => 'Selengkapnya',
+    'read_less' => 'Lebih Sedikit',
     'view_all' => 'Lihat Semua Jurnal',
     'visit' => 'Kunjungi Jurnal',
     'contact' => 'Kontak',
