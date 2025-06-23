@@ -28,10 +28,6 @@ Route::get('/journal', function () {
     return Inertia::render('User/Journal/Index');
 })->name('journal');
 
-Route::get('/categories', function () {
-    return Inertia::render('Admin/Category/Index');
-})->name('dashboard.categories.index');
-
 Route::get('/about-us', function () {
     return Inertia::render('User/About/Index');
 })->name('user.about.index');
@@ -50,19 +46,18 @@ Route::get('/events/{slug}', function ($slug) {
     ]);
 });
 
-Route::get('/dashboard/partners', function () {
-    return Inertia::render('Admin/MOU/Index');
-})->name('dashboard.partners.index');
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Admin/Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/survey/{slug}', function ($slug) {
+    return Inertia::render('User/Survey/SurveyFill', ['slug' => $slug]);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/dashboard', function () {
+        return Inertia::render('Admin/Dashboard');
+    })->name('dashboard');
     Route::get('/dashboard/journals', [JournalController::class, 'index'])->name('dashboard.journals.index');
     Route::get('/dashboard/teams', [TeamsController::class, 'index'])->name('dashboard.teams.index');
     Route::get('/dashboard/abouts', [AboutController::class, 'index'])->name('dashboard.abouts.index');
@@ -71,7 +66,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/campaigns', [EmailCampaignController::class, 'index'])->name('campaigns.index');
     Route::post('/dashboard/campaigns', [EmailCampaignController::class, 'store'])->name('campaigns.store');
     Route::get('/dashboard/campaigns/{id}', [EmailCampaignController::class, 'show'])->name('campaigns.show');
-    Route::get('/campaigns/create', fn () => Inertia::render('Admin/Campaigns/Create'))->name('campaigns.create');
+    Route::get('/campaigns/create', fn() => Inertia::render('Admin/Campaigns/Create'))->name('campaigns.create');
+    Route::get('/dashboard/partners', function () {
+        return Inertia::render('Admin/MOU/Index');
+    })->name('dashboard.partners.index');
+    Route::get('/categories', function () {
+        return Inertia::render('Admin/Category/Index');
+    })->name('dashboard.categories.index');
 });
 
 Route::fallback(function () {

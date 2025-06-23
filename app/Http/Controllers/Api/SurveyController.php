@@ -24,7 +24,7 @@ class SurveyController extends Controller
 
         $survey = Survey::create($request->only('title', 'description', 'start_at', 'end_at'));
 
-        return response()->json($survey, 201);
+        return redirect()->route('dashboard.surveys.index');
     }
 
     public function show($id)

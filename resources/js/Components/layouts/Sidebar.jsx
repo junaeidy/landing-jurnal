@@ -8,6 +8,7 @@ import {
     EnvelopeOpenIcon,
     HomeIcon,
     InformationCircleIcon,
+    PencilSquareIcon,
     UserGroupIcon,
 } from "@heroicons/react/24/solid";
 
@@ -21,6 +22,7 @@ const navItems = [
     { name: "Manajemen Team", icon: UserGroupIcon, href: route("dashboard.teams.index")},
     { name: "Manajemen About", icon: InformationCircleIcon, href: route("dashboard.abouts.index")},
     { name: "Campaign Email", icon: EnvelopeOpenIcon, href: route("campaigns.index")},
+    { name: "Dashboard Survey", icon: PencilSquareIcon, href: route("dashboard.surveys.index")},
 ];
 
 export default function Sidebar({ activeTab, setActiveTab }) {
