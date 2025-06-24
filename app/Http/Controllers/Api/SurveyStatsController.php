@@ -17,23 +17,51 @@ class SurveyStatsController extends Controller
         $statistics = [];
 
         foreach ($survey->questions as $question) {
-            $counts = [];
-
-            foreach ($answers as $answer) {
-                $userAnswers = $answer->answers;
-
-                if (isset($userAnswers[$question->id])) {
-                    $value = $userAnswers[$question->id];
-                    $counts[$value] = ($counts[$value] ?? 0) + 1;
+            if ($question->type === 'text') {
+                $textAnswers = [];
+                foreach ($answers as $answer) {
+                    $userAnswers = $answer->answers;
+                    if (isset($userAnswers[$question->id])) {
+                        $textAnswers[] = $userAnswers[$question->id];
+                    }
                 }
-            }
 
-            $statistics[] = [
-                'id' => $question->id,
-                'question_text' => $question->question_text,
-                'summary' => $counts,
-            ];
+                $statistics[] = [
+                    'id' => $question->id,
+                    'question_text' => $question->question_text,
+                    'type' => $question->type,
+                    'chart_type' => $question->chart_type,
+                    'answers' => $textAnswers,
+                ];
+            } else {
+                $counts = [];
+
+                foreach ($answers as $answer) {
+                    $userAnswers = $answer->answers;
+
+                    if (isset($userAnswers[$question->id])) {
+                        $value = $userAnswers[$question->id];
+                        if (is_array($value)) {
+                            foreach ($value as $v) {
+                                $counts[$v] = ($counts[$v] ?? 0) + 1;
+                            }
+                        } else {
+                            $counts[$value] = ($counts[$value] ?? 0) + 1;
+                        }
+                    }
+                }
+
+                $statistics[] = [
+                    'id' => $question->id,
+                    'question_text' => $question->question_text,
+                    'type' => $question->type,
+                    'chart_type' => $question->chart_type,
+                    'summary' => $counts,
+                ];
+            }
         }
+
+
 
         return response()->json([
             'survey_id' => $survey->id,

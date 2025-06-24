@@ -49,12 +49,48 @@ class PublicSurveyController extends Controller
         $allowedChoices = ["Sangat Tidak Setuju", "Tidak Setuju", "Netral", "Setuju", "Sangat Setuju"];
 
         foreach ($request->answers as $questionId => $value) {
-            if (!in_array($value, $allowedChoices)) {
+            $question = $survey->questions->where('id', $questionId)->first();
+
+            if (!$question) {
                 return response()->json([
-                    'message' => "Jawaban tidak valid untuk pertanyaan ID: $questionId"
+                    'message' => "Pertanyaan tidak ditemukan: $questionId"
                 ], 422);
             }
+
+            if ($question->type === 'text') {
+                continue;
+            }
+
+            if (!is_array($question->options)) {
+                return response()->json([
+                    'message' => "Pertanyaan ID $questionId tidak memiliki opsi yang valid."
+                ], 422);
+            }
+
+            if ($question->type === 'multiselect') {
+                if (!is_array($value)) {
+                    return response()->json([
+                        'message' => "Jawaban untuk pertanyaan ID $questionId harus berupa array (multiselect)."
+                    ], 422);
+                }
+
+                foreach ($value as $v) {
+                    if (!in_array($v, $question->options)) {
+                        return response()->json([
+                            'message' => "Jawaban '$v' tidak valid untuk pertanyaan ID $questionId"
+                        ], 422);
+                    }
+                }
+            } else {
+                // radio / select
+                if (!in_array($value, $question->options)) {
+                    return response()->json([
+                        'message' => "Jawaban '" . (is_array($value) ? implode(', ', $value) : $value) . "' tidak valid untuk pertanyaan ID $questionId"
+                    ], 422);
+                }
+            }
         }
+
 
         SurveyAnswer::create([
             'survey_id' => $survey->id,

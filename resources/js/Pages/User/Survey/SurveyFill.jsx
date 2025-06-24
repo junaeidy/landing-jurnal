@@ -3,14 +3,6 @@ import axios from "axios";
 import { router, Head } from "@inertiajs/react";
 import { toast } from "react-hot-toast";
 
-const options = [
-    "Sangat Tidak Setuju",
-    "Tidak Setuju",
-    "Netral",
-    "Setuju",
-    "Sangat Setuju",
-];
-
 export default function SurveyFill({ slug }) {
     const [survey, setSurvey] = useState(null);
     const [currentStep, setCurrentStep] = useState(-1);
@@ -25,7 +17,7 @@ export default function SurveyFill({ slug }) {
             try {
                 const [surveyRes, checkRes] = await Promise.all([
                     axios.get(`/api/survey/${slug}`),
-                    axios.get(`/api/surveys/${slug}/check`)
+                    axios.get(`/api/surveys/${slug}/check`),
                 ]);
 
                 setSurvey(surveyRes.data);
@@ -56,12 +48,33 @@ export default function SurveyFill({ slug }) {
         }));
     };
 
+    const handleMultiSelectChange = (questionId, value) => {
+        setAnswers((prev) => {
+            const prevValues = prev[questionId] || [];
+            const exists = prevValues.includes(value);
+            const newValues = exists
+                ? prevValues.filter((v) => v !== value)
+                : [...prevValues, value];
+            return {
+                ...prev,
+                [questionId]: newValues,
+            };
+        });
+    };
+
     const handleNext = () => {
-        const currentQuestionId = survey.questions[currentStep].id;
-        if (!answers[currentQuestionId]) {
-            toast.error("Harap pilih salah satu jawaban terlebih dahulu.");
+        const currentQuestion = survey.questions[currentStep];
+        const currentAnswer = answers[currentQuestion.id];
+
+        if (
+            (currentQuestion.type === "select" &&
+                (!currentAnswer || currentAnswer.length === 0)) ||
+            (!currentAnswer && currentQuestion.type !== "text")
+        ) {
+            toast.error("Harap isi jawaban terlebih dahulu.");
             return;
         }
+
         setCurrentStep((prev) => prev + 1);
     };
 
@@ -81,12 +94,13 @@ export default function SurveyFill({ slug }) {
         }
     };
 
-    // 💫 Spinner custom loading
     if (loading) {
         return (
             <div className="fixed inset-0 bg-white z-[999] flex flex-col items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#1b096c] border-t-transparent"></div>
-                <p className="mt-4 text-gray-600 text-sm font-medium">Loading...</p>
+                <p className="mt-4 text-gray-600 text-sm font-medium">
+                    Loading...
+                </p>
             </div>
         );
     }
@@ -95,7 +109,9 @@ export default function SurveyFill({ slug }) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
                 <div className="max-w-xl w-full bg-white p-8 rounded shadow text-center">
-                    <h2 className="text-2xl font-bold text-red-600 mb-4">Oops!</h2>
+                    <h2 className="text-2xl font-bold text-red-600 mb-4">
+                        Oops!
+                    </h2>
                     <p className="text-gray-600">{errorMessage}</p>
                 </div>
             </div>
@@ -110,7 +126,9 @@ export default function SurveyFill({ slug }) {
                     <h2 className="text-2xl font-bold text-red-600 mb-4">
                         Anda sudah pernah mengisi survey ini!
                     </h2>
-                    <p className="text-gray-600">Terima kasih atas partisipasinya 🙏</p>
+                    <p className="text-gray-600">
+                        Terima kasih atas partisipasinya 🙏
+                    </p>
                 </div>
             </div>
         );
@@ -121,10 +139,15 @@ export default function SurveyFill({ slug }) {
             <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
                 <Head title={`Survey: ${survey.title}`} />
                 <div className="max-w-xl w-full bg-white p-8 rounded shadow text-center">
-                    <h2 className="text-2xl font-bold text-green-600 mb-4">Terima kasih!</h2>
-                    <p className="text-gray-600">Jawaban Anda berhasil disimpan.</p>
+                    <h2 className="text-2xl font-bold text-green-600 mb-4">
+                        Terima kasih!
+                    </h2>
+                    <p className="text-gray-600">
+                        Jawaban Anda berhasil disimpan.
+                    </p>
                     <p className="mt-2 text-sm text-gray-400">
-                        Anda akan diarahkan ke halaman utama dalam beberapa detik...
+                        Anda akan diarahkan ke halaman utama dalam beberapa
+                        detik...
                     </p>
                 </div>
             </div>
@@ -149,7 +172,9 @@ export default function SurveyFill({ slug }) {
             <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
                 <Head title={`Survey: ${survey.title}`} />
                 <div className="max-w-xl w-full bg-white p-8 rounded shadow text-center">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-4">{survey.title}</h1>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-4">
+                        {survey.title}
+                    </h1>
                     <p className="text-gray-600 mb-6">{survey.description}</p>
                     <button
                         onClick={handleStart}
@@ -163,68 +188,129 @@ export default function SurveyFill({ slug }) {
     }
 
     const question = survey.questions[currentStep];
+    const options = question.options || [];
 
     return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-50 to-white px-4 py-10">
-        <Head title={`Survey: ${survey.title}`} />
-        <div className="max-w-xl w-full bg-white p-8 rounded-2xl shadow-lg space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-                {currentStep + 1}. {question.question_text}
-            </h2>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-50 to-white px-4 py-10">
+            <Head title={`Survey: ${survey.title}`} />
+            <div className="max-w-xl w-full bg-white p-8 rounded-2xl shadow-lg space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">
+                    {currentStep + 1}. {question.question_text}
+                </h2>
 
-            <div className="space-y-3">
-                {options.map((option) => (
-                    <label
-                        key={option}
-                        className={`flex items-center px-4 py-3 border rounded-lg cursor-pointer transition duration-150 ${
-                            answers[question.id] === option
-                                ? "bg-blue-50 border-blue-500 ring-2 ring-blue-200"
-                                : "bg-white hover:bg-gray-50"
-                        }`}
+                {question.type === "text" ? (
+                    <textarea
+                        value={answers[question.id] || ""}
+                        onChange={(e) =>
+                            handleChange(question.id, e.target.value)
+                        }
+                        rows={4}
+                        className="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                        placeholder="Tulis jawaban Anda di sini..."
+                    />
+                ) :
+                    question.type === "select" ? (
+                    <select
+                        value={answers[question.id] || ""}
+                        onChange={(e) =>
+                            handleChange(question.id, e.target.value)
+                        }
+                        className="w-full border rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
                     >
-                        <input
-                            type="radio"
-                            name={`question-${question.id}`}
-                            value={option}
-                            checked={answers[question.id] === option}
-                            onChange={() => handleChange(question.id, option)}
-                            className="form-radio text-blue-600 h-5 w-5 mr-3"
-                        />
-                        <span className="text-gray-700">{option}</span>
-                    </label>
-                ))}
-            </div>
+                        {options.map((option) => (
+                            <option key={option} value={option}>
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                ): question.type === "radio" ? (
+                    <div className="space-y-3">
+                        {options.map((option) => (
+                            <label
+                                key={option}
+                                className={`flex items-center px-4 py-3 border rounded-lg cursor-pointer transition duration-150 ${
+                                    answers[question.id] === option
+                                        ? "bg-blue-50 border-blue-500 ring-2 ring-blue-200"
+                                        : "bg-white hover:bg-gray-50"
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name={`question-${question.id}`}
+                                    value={option}
+                                    checked={answers[question.id] === option}
+                                    onChange={() =>
+                                        handleChange(question.id, option)
+                                    }
+                                    className="form-radio text-blue-600 h-5 w-5 mr-3"
+                                />
+                                <span className="text-gray-700">{option}</span>
+                            </label>
+                        ))}
+                    </div>
+                ) : question.type === "multiselect" ? (
+                    <div className="space-y-3">
+                        {options.map((option) => (
+                            <label
+                                key={option}
+                                className={`flex items-center px-4 py-3 border rounded-lg cursor-pointer transition duration-150 ${
+                                    (answers[question.id] || []).includes(
+                                        option
+                                    )
+                                        ? "bg-blue-50 border-blue-500 ring-2 ring-blue-200"
+                                        : "bg-white hover:bg-gray-50"
+                                }`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    name={`question-${question.id}`}
+                                    value={option}
+                                    checked={(
+                                        answers[question.id] || []
+                                    ).includes(option)}
+                                    onChange={() =>
+                                        handleMultiSelectChange(
+                                            question.id,
+                                            option
+                                        )
+                                    }
+                                    className="form-checkbox text-blue-600 h-5 w-5 mr-3"
+                                />
+                                <span className="text-gray-700">{option}</span>
+                            </label>
+                        ))}
+                    </div>
+                ) : null}
 
-            <div className="flex justify-between items-center pt-4 border-t">
-                {currentStep > 0 ? (
-                    <button
-                        onClick={() => setCurrentStep((prev) => prev - 1)}
-                        className="text-sm text-gray-600 hover:text-gray-800 hover:underline"
-                    >
-                        ← Kembali
-                    </button>
-                ) : (
-                    <div />
-                )}
+                <div className="flex justify-between items-center pt-4 border-t">
+                    {currentStep > 0 ? (
+                        <button
+                            onClick={() => setCurrentStep((prev) => prev - 1)}
+                            className="text-sm text-gray-600 hover:text-gray-800 hover:underline"
+                        >
+                            ← Kembali
+                        </button>
+                    ) : (
+                        <div />
+                    )}
 
-                {currentStep < survey.questions.length - 1 ? (
-                    <button
-                        onClick={handleNext}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2 rounded-lg transition"
-                    >
-                        Lanjut →
-                    </button>
-                ) : (
-                    <button
-                        onClick={handleSubmit}
-                        className="bg-green-600 hover:bg-green-700 text-white font-semibold text-sm px-5 py-2 rounded-lg transition"
-                    >
-                        Kirim Jawaban
-                    </button>
-                )}
+                    {currentStep < survey.questions.length - 1 ? (
+                        <button
+                            onClick={handleNext}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2 rounded-lg transition"
+                        >
+                            Lanjut →
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleSubmit}
+                            className="bg-green-600 hover:bg-green-700 text-white font-semibold text-sm px-5 py-2 rounded-lg transition"
+                        >
+                            Kirim Jawaban
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
-    </div>
-);
-
+    );
 }

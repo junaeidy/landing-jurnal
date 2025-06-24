@@ -73,6 +73,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/categories', function () {
         return Inertia::render('Admin/Category/Index');
     })->name('dashboard.categories.index');
+    Route::get('/dashboard/surveys', function () {
+        return Inertia::render('Admin/Survey/Index');
+    })->name('dashboard.surveys.index');
+    Route::get('/admin/surveys/create', function () {
+        return Inertia::render('Admin/Survey/Create');
+    });
+    Route::get('/admin/surveys/{id}/edit', function ($id) {
+        return Inertia::render('Admin/Survey/Edit', [
+            'surveyId' => (int) $id,
+        ]);
+    });
+    Route::get('/admin/surveys/{id}/stats', function ($id) {
+        return Inertia::render('Admin/Survey/Stats/Index', [
+            'surveyId' => (int) $id,
+        ]);
+    });
 });
 
 Route::fallback(function () {
@@ -94,7 +110,5 @@ Route::get('/lang/{locale}', function ($locale, Request $request) {
 
     return redirect($request->query('redirect', '/'));
 });
-
-
 
 require __DIR__ . '/auth.php';
