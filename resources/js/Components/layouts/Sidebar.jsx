@@ -33,7 +33,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             <div className="text-2xl font-bold text-blue-600 mb-8">
                <p>Adra Karima Hubbi</p>
             </div>
-            <nav className="flex-1 space-y-2">
+            <nav className="flex-1 space-y-2 overflow-y-auto min-h-0">
                 {navItems.map((item) =>
                     item.href ? (
                         <Link
