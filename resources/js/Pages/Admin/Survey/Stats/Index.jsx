@@ -372,37 +372,52 @@ export default function SurveyStats() {
     };
 
     const handleExportExcel = () => {
-        const wb = XLSX.utils.book_new();
+        setIsExporting(true);
 
-        survey.questions.forEach((q, idx) => {
-            let rows = [];
+        if (!stats || !stats.questions) {
+            console.warn("Data survei belum tersedia.");
+            setIsExporting(false);
+            return;
+        }
+
+        const rows = [];
+        rows.push([`Statistik: ${stats.title}`]);
+        rows.push([`Total Responden: ${stats.responden_total}`]);
+        rows.push([]);
+
+        stats.questions.forEach((q, idx) => {
+            rows.push([`${idx + 1}. ${q.question_text}`]);
 
             if (q.type === "text" && q.answers?.length > 0) {
-                // Jawaban teks dikemas sebagai komentar
-                rows = q.answers.map((ans, i) => ({
-                    No: i + 1,
-                    Komentar: ans,
-                }));
-            } else if (q.summary && Object.keys(q.summary).length > 0) {
-                // Jawaban pilihan dikemas sebagai ringkasan
-                rows = Object.entries(q.summary).map(([label, count]) => ({
-                    "Opsi Jawaban": label,
-                    "Jumlah Responden": count,
-                }));
+                rows.push(["No", "Komentar"]);
+                q.answers.forEach((ans, i) => {
+                    rows.push([i + 1, ans]);
+                });
+            } else if (
+                q.type !== "text" &&
+                q.summary &&
+                Object.keys(q.summary).length > 0
+            ) {
+                rows.push(["Opsi Jawaban", "Jumlah Responden"]);
+                Object.entries(q.summary).forEach(([label, count]) => {
+                    rows.push([label, count]);
+                });
+            } else {
+                rows.push(["Belum ada jawaban."]);
             }
 
-            if (rows.length > 0) {
-                const ws = XLSX.utils.json_to_sheet(rows);
-                const sheetName = `Pertanyaan ${idx + 1}`;
-                XLSX.utils.book_append_sheet(wb, ws, sheetName);
-            }
+            rows.push([]);
         });
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Statistik Survei");
 
         const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-        const blob = new Blob([wbout], {
-            type: "application/octet-stream",
-        });
-        saveAs(blob, `survey-hasil-${surveyId}.xlsx`);
+        const blob = new Blob([wbout], { type: "application/octet-stream" });
+        saveAs(blob, `statistik-survei-${stats.id || "ekspor"}.xlsx`);
+
+        setIsExporting(false);
     };
 
     return (
