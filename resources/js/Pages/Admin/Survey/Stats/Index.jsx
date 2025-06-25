@@ -26,6 +26,18 @@ import { usePage, Head } from "@inertiajs/react";
 import Topbar from "@/Components/layouts/Topbar";
 import Sidebar from "@/Components/layouts/Sidebar";
 import html2pdf from "html2pdf.js";
+import { saveAs } from "file-saver";
+import html2canvas from "html2canvas";
+import {
+    Document,
+    Packer,
+    Paragraph,
+    HeadingLevel,
+    TextRun,
+    ImageRun,
+} from "docx";
+import * as XLSX from "xlsx";
+import { FileText, FileSpreadsheet, FileDown, ChevronDown } from "lucide-react";
 
 const STATUS_COLORS = {
     "Sangat Tidak Setuju": "#ef4444",
@@ -68,6 +80,7 @@ export default function SurveyStats() {
     const [activeTab, setActiveTab] = useState("Dashboard Survey");
     const [stats, setStats] = useState(null);
     const [isExporting, setIsExporting] = useState(false);
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         axios.get(`/api/admin/surveys/${surveyId}/stats`).then((res) => {
@@ -307,6 +320,91 @@ export default function SurveyStats() {
         setIsExporting(false);
     };
 
+    const handleExportDocx = async () => {
+        setIsExporting(true);
+        const element = document.getElementById("stats-content");
+        if (!element) return;
+
+        // Ambil gambar dari elemen chart
+        const canvas = await html2canvas(element, { useCORS: true, scale: 2 });
+        const imgDataUrl = canvas.toDataURL("image/png");
+        const imgBlob = await fetch(imgDataUrl).then((res) => res.blob());
+        const imgArrayBuffer = await imgBlob.arrayBuffer();
+
+        // Buat dokumen Word
+        const doc = new Document({
+            sections: [
+                {
+                    properties: {},
+                    children: [
+                        new Paragraph({
+                            text: "Statistik Survei",
+                            heading: HeadingLevel.HEADING1,
+                        }),
+                        new Paragraph({
+                            children: [
+                                new TextRun(
+                                    "Berikut adalah diagram hasil survei:"
+                                ),
+                            ],
+                        }),
+                        new Paragraph({
+                            children: [
+                                new ImageRun({
+                                    data: imgArrayBuffer,
+                                    transformation: {
+                                        width: 600,
+                                        height:
+                                            (canvas.height * 600) /
+                                            canvas.width,
+                                    },
+                                }),
+                            ],
+                        }),
+                    ],
+                },
+            ],
+        });
+
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `survey-statistik-${surveyId}.docx`);
+        setIsExporting(false);
+    };
+
+    const handleExportExcel = () => {
+        const wb = XLSX.utils.book_new();
+
+        survey.questions.forEach((q, idx) => {
+            let rows = [];
+
+            if (q.type === "text" && q.answers?.length > 0) {
+                // Jawaban teks dikemas sebagai komentar
+                rows = q.answers.map((ans, i) => ({
+                    No: i + 1,
+                    Komentar: ans,
+                }));
+            } else if (q.summary && Object.keys(q.summary).length > 0) {
+                // Jawaban pilihan dikemas sebagai ringkasan
+                rows = Object.entries(q.summary).map(([label, count]) => ({
+                    "Opsi Jawaban": label,
+                    "Jumlah Responden": count,
+                }));
+            }
+
+            if (rows.length > 0) {
+                const ws = XLSX.utils.json_to_sheet(rows);
+                const sheetName = `Pertanyaan ${idx + 1}`;
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            }
+        });
+
+        const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        const blob = new Blob([wbout], {
+            type: "application/octet-stream",
+        });
+        saveAs(blob, `survey-hasil-${surveyId}.xlsx`);
+    };
+
     return (
         <div className="flex h-screen overflow-hidden">
             <Head title="Statistik Survei" />
@@ -332,13 +430,57 @@ export default function SurveyStats() {
                             <h1 className="text-2xl font-bold text-gray-800">
                                 Statistik: {stats.title}
                             </h1>
-                            <button
-                                disabled={isExporting}
-                                onClick={handleExportPDF}
-                                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                            >
-                                {isExporting ? "Mengekspor..." : "Export PDF"}
-                            </button>
+                            <div className="relative inline-block text-left">
+                                <button
+                                    onClick={() => setOpen((prev) => !prev)}
+                                    className="inline-flex items-center gap-2 rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                    Ekspor
+                                    <ChevronDown className="w-4 h-4" />
+                                </button>
+
+                                {open && (
+                                    <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                        <div className="py-1">
+                                            <button
+                                                onClick={() => {
+                                                    handleExportDocx();
+                                                    setOpen(false);
+                                                }}
+                                                className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            >
+                                                <FileText className="w-4 h-4" />
+                                                Ekspor Word
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    handleExportExcel();
+                                                    setOpen(false);
+                                                }}
+                                                className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            >
+                                                <FileSpreadsheet className="w-4 h-4" />
+                                                Ekspor Excel
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    handleExportPDF();
+                                                    setOpen(false);
+                                                }}
+                                                disabled={isExporting}
+                                                className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 disabled:opacity-50"
+                                            >
+                                                <FileDown className="w-4 h-4" />
+                                                {isExporting
+                                                    ? "Mengekspor..."
+                                                    : "Ekspor PDF"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <p className="mb-6 text-sm text-gray-600">
                             Total Responden: {stats.responden_total}
